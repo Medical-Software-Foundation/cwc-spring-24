@@ -5,9 +5,14 @@ from utils import query_openai
 app = Flask(__name__)
 
 
+@app.route('/', methods=['GET'])
+def hello():
+  return jsonify('hello'), 200
+
+
 # Define the endpoint
-@app.route('/make-me-laugh', methods=['GET'])
-def diagnose():
+@app.route('/joke', methods=['GET'])
+def joke():
   # Get the symptoms description from the query parameter
   topic = request.args.get('topic')
   if not topic:
@@ -23,6 +28,26 @@ def diagnose():
 
   # Return the list of possible diagnoses in JSON format
   return jsonify({"joke": joke}), 200
+
+
+# Define the endpoint
+@app.route('/primary-care', methods=['GET'])
+def primary_care():
+  # Get insights description from the query parameter
+  population = request.args.get('population')
+  if not population:
+    return jsonify({"error": "population is required."}), 400
+
+  # Query OpenAI API
+  try:
+    value_to_population = query_openai(
+        f"Act as an innovator like Clay Christensen who understand US healthcare deeply, and reflect on the value that primary care can bring to {population}."
+    )
+  except Exception as e:
+    return jsonify({"error": str(e)}), 500
+
+  # Return the list of possible diagnoses in JSON format
+  return jsonify({"primary_care": value_to_population}), 200
 
 
 # Run the Flask app
